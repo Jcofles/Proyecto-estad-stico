@@ -47,6 +47,8 @@ php artisan migrate
 npm install
 ```
 
+Livewire ya está incluido en `composer.json`, por lo que queda instalado automáticamente con `composer install`. No es necesario ejecutar un comando adicional como `composer require livewire/livewire`.
+
 Si el archivo `.env` ya existe, conserva tu configuración actual y omite `Copy-Item`. En la configuración actual, completa estos valores con los datos de tu instalación de MySQL:
 
 ```dotenv
