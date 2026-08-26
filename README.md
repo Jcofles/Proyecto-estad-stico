@@ -20,7 +20,7 @@ Actualmente, la interfaz utiliza resultados ficticios para validar la experienci
 - **Livewire 4**: componente interactivo de la simulación.
 - **Vite**, **Tailwind CSS 4** y **Node.js**: compilación de recursos frontend.
 - **FastAPI** y **Python**: API independiente para la futura lógica de simulación.
-- **SQLite**: base de datos local predeterminada de Laravel.
+- **MySQL**: base de datos configurada actualmente en el archivo `.env`.
 
 ## Requisitos previos
 
@@ -30,6 +30,7 @@ Instala las siguientes herramientas:
 - Node.js y npm.
 - Python 3.10 o superior recomendado.
 - Git, opcional para clonar el repositorio.
+- MySQL en ejecución, con una base de datos creada para el proyecto.
 
 ## Instalación
 
@@ -42,12 +43,29 @@ Set-Location Laravel
 composer install
 Copy-Item .env.example .env
 php artisan key:generate
-New-Item -ItemType File -Path database/database.sqlite -Force
 php artisan migrate
 npm install
 ```
 
-Si el archivo `.env` ya existe, conserva tu configuración actual y omite `Copy-Item`.
+Si el archivo `.env` ya existe, conserva tu configuración actual y omite `Copy-Item`. En la configuración actual, completa estos valores con los datos de tu instalación de MySQL:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nombre_de_tu_base_de_datos
+DB_USERNAME=root
+DB_PASSWORD=tu_contraseña
+```
+
+Crea previamente la base de datos en MySQL y luego ejecuta `php artisan migrate`.
+
+Como alternativa para desarrollo local, puedes usar SQLite cambiando `DB_CONNECTION=sqlite` y creando el archivo `database/database.sqlite` antes de ejecutar las migraciones:
+
+```powershell
+New-Item -ItemType File -Path database/database.sqlite -Force
+php artisan migrate
+```
 
 ### 2. FastAPI
 
