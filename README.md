@@ -1,6 +1,18 @@
 # Proyecto.E
 
-Aplicación para analizar el comportamiento de un cajero automático mediante una simulación de Monte Carlo. El proyecto combina una interfaz web en Laravel y Livewire con una API independiente en FastAPI.
+Aplicación para analizar el comportamiento de un cajero automático mediante una simulación de Monte Carlo. El proyecto combina una interfaz web sencilla en Laravel Blade con una API independiente en FastAPI.
+
+## Estado actual
+
+El primer módulo, **estimar probabilidades**, está implementado y probado:
+
+- FastAPI recibe el número de clientes, la probabilidad de fallo y el número de simulaciones.
+- FastAPI calcula la probabilidad exacta de al menos una falla y la probabilidad de no tener fallas.
+- FastAPI estima la probabilidad mediante Monte Carlo.
+- Laravel valida el formulario y consume el endpoint de FastAPI.
+- Laravel muestra los resultados en una vista Blade.
+
+Los módulos de simulación de riesgos, confiabilidad y tiempos de espera todavía están pendientes.
 
 ## Objetivo
 
@@ -12,13 +24,13 @@ El objetivo es permitir la configuración de un escenario de atención en un caj
 - Probabilidad de esperas superiores a cinco minutos.
 - Muestra de clientes con sus tiempos de llegada, espera, fallas y estado.
 
-Actualmente, la interfaz utiliza resultados ficticios para validar la experiencia visual. La conexión entre Laravel y FastAPI queda preparada como siguiente etapa de desarrollo.
+Actualmente, la interfaz de probabilidades utiliza resultados calculados por FastAPI. La simulación completa del cajero todavía se desarrollará en módulos posteriores.
 
 ## Tecnologías
 
 - **Laravel 13** y **PHP 8.3 o superior**: aplicación web principal.
-- **Livewire 4**: componente interactivo de la simulación.
-- **Vite**, **Tailwind CSS 4** y **Node.js**: compilación de recursos frontend.
+- **Blade**: interfaz HTML del módulo actual.
+- **Vite**, **Tailwind CSS 4** y **Node.js**: herramientas frontend disponibles, pero opcionales para la vista HTML actual.
 - **FastAPI** y **Python**: API independiente para la futura lógica de simulación.
 - **MySQL**: base de datos configurada actualmente en el archivo `.env`.
 
@@ -46,6 +58,8 @@ php artisan key:generate
 php artisan migrate
 npm install
 ```
+
+`npm install` solo es necesario si vas a utilizar o compilar los recursos de Vite, Tailwind o JavaScript. Para la vista Blade sencilla actual no es necesario ejecutar `npm run dev`.
 
 Livewire ya está incluido en `composer.json`, por lo que queda instalado automáticamente con `composer install`. No es necesario ejecutar un comando adicional como `composer require livewire/livewire`.
 
@@ -91,17 +105,19 @@ En una terminal:
 
 ```powershell
 Set-Location Laravel
-php artisan serve
+php artisan serve --port=8001
 ```
 
-En otra terminal, para compilar y observar los recursos frontend:
+La aplicación estará disponible en [http://127.0.0.1:8001](http://127.0.0.1:8001).
+
+### Vite, opcional
+
+Ejecuta esto solo si la vista utiliza `@vite(['resources/css/app.css', 'resources/js/app.js'])` o si vas a trabajar en CSS, Tailwind o JavaScript:
 
 ```powershell
 Set-Location Laravel
 npm run dev
 ```
-
-La aplicación estará disponible en [http://localhost:8000](http://localhost:8000).
 
 ### API FastAPI
 
@@ -113,37 +129,51 @@ Set-Location FastAPI
 uvicorn main:app --reload
 ```
 
-La API estará disponible en [http://127.0.0.1:8000](http://127.0.0.1:8000). El endpoint disponible actualmente es:
+La API estará disponible en [http://127.0.0.1:8000](http://127.0.0.1:8000). La documentación interactiva está en [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+Los endpoints disponibles actualmente son:
 
 ```text
 GET /
+POST /probabilidad/calcular
 ```
 
-Respuesta actual:
+Ejemplo de entrada para `POST /probabilidad/calcular`:
 
 ```json
-{"message":"Hola bb"}
+{
+	"numero_de_clientes": 10,
+	"probabilidad_de_fallo": 0.03,
+	"simulaciones": 10000
+}
 ```
 
-> Laravel y FastAPI usan por defecto puertos distintos en los comandos anteriores: Laravel en `8000` y FastAPI en `8000`. Si ejecutas ambos al mismo tiempo, cambia uno de los puertos, por ejemplo: `php artisan serve --port=8001` o `uvicorn main:app --reload --port 8001`.
+Laravel utiliza `FASTAPI_URL=http://127.0.0.1:8000` para comunicarse con FastAPI. Por eso Laravel se ejecuta en el puerto `8001` y FastAPI en el `8000`.
 
 ## Uso
 
-1. Abre la aplicación Laravel en el navegador.
-2. Introduce el número de clientes y los parámetros de llegada, servicio, fallas y capacidad máxima de la fila.
-3. Pulsa **Ejecutar Simulación**.
-4. Consulta las métricas y la muestra de los primeros clientes.
+1. Inicia FastAPI en el puerto `8000`.
+2. Inicia Laravel en el puerto `8001`.
+3. Abre la aplicación Laravel en el navegador.
+4. Introduce el número de clientes, la probabilidad de fallo y el número de simulaciones.
+5. Pulsa **Calcular** y consulta los resultados.
 
 ## Estructura principal
 
 ```text
 Proyecto.E/
 ├── FastAPI/
-│   └── main.py                    # API FastAPI mínima
+│   ├── main.py                    # Entrada de la API
+│   └── app/
+│       ├── api/probabilidad.py    # Endpoint de probabilidades
+│       ├── schemas/               # Validación de datos
+│       └── services/              # Cálculos Monte Carlo
 ├── Laravel/
-│   ├── app/Livewire/AtmSimulation.php  # Lógica del componente ATM
-│   ├── resources/views/livewire/index.blade.php  # Interfaz
-│   ├── routes/web.php             # Ruta principal
+│   ├── app/Http/Controllers/ProbabilidadController.php
+│   ├── app/Services/FastApiClient.php
+│   ├── resources/views/probabilidad/index.blade.php
+│   ├── routes/web.php             # Rutas web
+│   ├── config/services.php        # URL de FastAPI
 │   ├── resources/css/             # Estilos Tailwind
 │   ├── resources/js/              # JavaScript de frontend
 │   ├── database/migrations/       # Migraciones
@@ -163,11 +193,11 @@ php artisan test
 
 ## Próximos pasos sugeridos
 
-- Implementar la simulación Monte Carlo real en FastAPI.
-- Crear un endpoint POST que reciba los parámetros del formulario.
-- Configurar Laravel/Livewire para consumir ese endpoint.
-- Añadir validación de rangos y mensajes de error para los parámetros.
-- Incorporar pruebas para la API y para el flujo completo de simulación.
+- Añadir el módulo de simulación de riesgos del cajero.
+- Analizar la confiabilidad del sistema.
+- Estimar los tiempos de espera y el comportamiento de la cola.
+- Crear pruebas automatizadas para FastAPI y Laravel.
+- Mejorar la presentación de resultados en la vista Blade.
 
 ## Licencia
 
