@@ -8,10 +8,11 @@ class FastApiClient
 {
     public function calcularProbabilidad(array $datos): array
     {
-       $respuesta = Http::post
-       (config('services.fastapi.url') . '/probabilidad/calcular', 
-       $datos
-       );
+        set_time_limit(300);
+        $respuesta = Http::timeout(300)->post(
+            config('services.fastapi.url') . '/probabilidad/calcular',
+            $datos
+        );
 
        $respuesta->throw();
        return $respuesta->json();

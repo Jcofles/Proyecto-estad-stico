@@ -5,10 +5,10 @@ use Pdo\Mysql;
 
 return [
 
- 
+
     'default' => env('DB_CONNECTION', 'sqlite'),
 
- 
+
     'connections' => [
 
         'sqlite' => [
@@ -39,7 +39,7 @@ return [
             'strict' => true,
             'engine' => 'InnoDB ROW_FORMAT=DYNAMIC', //cambio
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_INIT_COMMAND => env('SET GLOBAL innodb_strict_mode=1'), //cambio
+                Mysql::ATTR_INIT_COMMAND => 'SET SESSION innodb_strict_mode=1',
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
@@ -129,7 +129,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

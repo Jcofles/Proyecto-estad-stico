@@ -14,8 +14,13 @@ return [
     |
     */
     'fastapi' => [
-'url' => env('FASTAPI_URL'), 
-], 
+        'url' => env('FASTAPI_URL', 'http://127.0.0.1:8000'),
+    ],
+
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY'),
+        'model' => env('OPENROUTER_MODEL', 'openrouter/free'),
+    ],
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
